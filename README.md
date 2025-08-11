@@ -10,6 +10,16 @@ This notebook demonstrates how to:
 - Cache a long public-domain text (Frankenstein by Mary Shelley) in the system prompt
 - Run tasks multiple times to observe cache performance improvements
 
+## Why this cookbook?
+
+- Prompt caching cuts input cost by up to ~90% and speeds up time-to-first-token by up to ~85% for long prompts by caching the long, repeated part of your prompt (usually system context) across API calls.
+- Ideal for multi-turn crews that reuse the same persona/rules, many-shot examples, or large docs across tasks/turns.
+- This notebook shows first-run cache write vs. subsequent cache read, how to set TTL (5 m default; optional 1 h beta), and how to verify hits via response usage fields.
+
+## Prompt caching flow
+
+![Prompt caching flow](prompt_caching_flow.png)
+
 ## Features
 
 - **Custom CrewAI LLM**: Extends `crewai.BaseLLM` with Anthropic prompt caching support

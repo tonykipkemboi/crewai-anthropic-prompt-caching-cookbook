@@ -1,0 +1,42 @@
+sequenceDiagram
+    autonumber
+    actor U as User / Notebook
+    participant C as Crew
+    participant A as Agent
+    participant L as AnthropicPromptCachingLLM
+    participant API as Anthropic Messages API
+    participant Cache as Anthropic Prompt Cache
+
+    Note over U: Run the notebook to demo caching
+
+    U->>C: kickoff()
+    C->>A: execute Task
+    A->>L: call(messages)
+    Note right of L: Build payload
+    Note right of L: - model, messages, temperature, max_tokens
+    Note right of L: - system = [persona, long text]
+    Note right of L: - last system block gets<br/>cache_control: { type: "ephemeral", ttl?: "1h" }
+    Note right of L: - headers: anthropopic-version (+ anthropic-beta for 1h)
+
+    alt First run (cache miss)
+        L->>API: POST /v1/messages (with cacheable system)
+        API->>Cache: Write cached system blocks
+        API-->>L: response + usage{ cache_creation_input_tokens }
+    else Subsequent run within TTL (cache hit)
+        L->>API: POST /v1/messages (same system content)
+        API->>Cache: Read cached system blocks
+        API-->>L: response + usage{ cache_read_input_tokens }
+    end
+
+    L-->>A: assistant text
+    A-->>C: task result
+    C-->>U: result + timing
+
+    Note over Cache: TTL options
+    Note over Cache: - 5m (default)
+    Note over Cache: - 1h (requires anthropic-beta header)
+
+    Note over L,API: Cache hit requires:
+    Note over L,API: - Identical system content
+    Note over L,API: - Same model + headers
+    Note over L,API: - Within TTL window.
