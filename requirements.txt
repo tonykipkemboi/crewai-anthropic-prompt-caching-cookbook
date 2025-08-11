@@ -1,0 +1,5 @@
+crewai[tools]
+anthropic
+requests
+jupyter
+ipython
